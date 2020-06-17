@@ -262,12 +262,15 @@ export default {
       };
       Login(data)
         .then(result => {
-          root.$message({
-            message: result.message,
-            type: "success"
+          // root.$message({
+          //   message: result.message,
+          //   type: "success"
+          // });
+          // /* 登录成功 */
+          // clearCountDown();
+          root.$router.push({
+            name: "Console"
           });
-          /* 登录成功 */
-          clearCountDown();
         })
         .catch(error => {});
     };
