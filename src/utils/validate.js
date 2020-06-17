@@ -9,3 +9,19 @@ export function stripscript(s) {
   }
   return rs;
 }
+
+export function checkUserName(value){
+  const reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((.[a-zA-Z0-9_-]{2,3}){1,2})$/;
+  return reg.test(value);
+}
+
+export function checkPwd(value){
+  let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
+  return reg.test(value);
+}
+
+export function checkCode(value){
+  let reg = /^[a-zA-Z0-9]{6}$/;
+  return reg.test(value);
+}
+
