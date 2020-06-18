@@ -1,6 +1,5 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Login from "../views/login/index.vue";
 
 Vue.use(VueRouter);
 
@@ -54,7 +53,7 @@ const routes = [
     component: Layout,
     meta: {
       name: "信息管理",
-      icon:"menu"
+      icon:"info"
     },
     hidden: false,
     children: [

@@ -1,5 +1,5 @@
 <template>
-  <section id="layout">
+  <section id="layout" :class="[menuCollapseState?'close':'open']">
     <LayoutHeader />
     <LayoutMain />
     <LayoutNav />
@@ -10,15 +10,21 @@
 import LayoutHeader from "./components/header.vue";
 import LayoutMain from "./components/main.vue";
 import LayoutNav from "./components/nav.vue";
+import { computed } from "@vue/composition-api";
 export default {
   name: "layout",
   components: { LayoutHeader, LayoutMain, LayoutNav },
-  setup() {}
+  setup(props, { root }) {
+    const menuCollapseState = computed(() => root.$store.state.app.isCollapse);
+    
+    return { menuCollapseState };
+  }
 };
 </script>
 
 <style scoped lang="scss">
-#layout{
+#layout {
   background-color: #f7f7f7;
 }
+
 </style>

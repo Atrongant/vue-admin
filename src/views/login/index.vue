@@ -260,19 +260,17 @@ export default {
         password: sha1(ruleForm.password),
         code: ruleForm.code
       };
-      Login(data)
-        .then(result => {
-          // root.$message({
-          //   message: result.message,
-          //   type: "success"
-          // });
-          // /* 登录成功 */
-          // clearCountDown();
+      root.$store
+        .dispatch("app/login", data)
+        .then(response => {
+          console.log("index.vue/266:", response);
+          /* 登录成功 */
+          clearCountDown();
           root.$router.push({
             name: "Console"
           });
         })
-        .catch(error => {});
+        .catch(err => {});
     };
     /* 注册 */
     const registerForm = () => {

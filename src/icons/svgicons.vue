@@ -17,7 +17,6 @@ export default {
     }
   },
   setup(props) {
-    console.log("svgicons.vue/15:", props.className);
     const msg = ref("abcdefghijkl");
     const iconName = computed(() => `#icon-${props.iconClass}`);
     const svgclass = computed(() => {
@@ -41,6 +40,5 @@ export default {
   width: 1em;
   height: 1em;
   fill: currentColor;
-  color: #fff;
 }
 </style>
