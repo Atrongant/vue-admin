@@ -54,7 +54,7 @@
               <el-input v-model="form.setCategoryName"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="danger" @click="submit">确定</el-button>
+              <el-button type="danger" @click="submit" :loading="loadingState">确定</el-button>
             </el-form-item>
           </el-form>
         </el-col>
@@ -71,49 +71,12 @@ export default {
   setup(props, { root }) {
     const categoryState = ref(true);
     const childState = ref(true);
+    const loadingState = ref(false);
     const form = reactive({
       categoryName: "",
       setCategoryName: ""
     });
-    let category = reactive({item:[]});
-    // reactive([
-    //   {
-    //     id: "1",
-    //     category_name: "国际信息",
-    //     children: [
-    //       {
-    //         id: "11",
-    //         category_name: "国际信息1-1"
-    //       },
-    //       {
-    //         id: "12",
-    //         category_name: "国际信息1-2"
-    //       },
-    //       {
-    //         id: "13",
-    //         category_name: "国际信息1-3"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     id: "2",
-    //     category_name: "国内信息",
-    //     children: [
-    //       {
-    //         id: "21",
-    //         category_name: "国内信息2-1"
-    //       },
-    //       {
-    //         id: "22",
-    //         category_name: "国内信息2-2"
-    //       },
-    //       {
-    //         id: "23",
-    //         category_name: "国内信息2-3"
-    //       }
-    //     ]
-    //   }
-    // ]);
+    let category = reactive({ item: [] });
     const submit = () => {
       if (!form.categoryName) {
         root.$message({
@@ -122,6 +85,7 @@ export default {
         });
         return false;
       }
+      loadingState.value = true;
       let requestData = {
         categoryName: form.categoryName
       };
@@ -133,8 +97,16 @@ export default {
               type: "success"
             });
           }
+          category.item.push(response.data);
+          loadingState.value = false;
+          form.categoryName = "";
+          form.setCategoryName = "";
         })
-        .catch(err => {});
+        .catch(err => {
+          loadingState.value = false;
+          form.categoryName = "";
+          form.setCategoryName = "";
+        });
     };
     const addFirst = () => {
       categoryState.value = true;
@@ -161,6 +133,7 @@ export default {
       //ref
       categoryState,
       childState,
+      loadingState,
       //reactive
       form,
       category,
