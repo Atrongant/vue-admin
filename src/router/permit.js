@@ -7,17 +7,12 @@ const whiteRouter = ["/login"];
 
 // 路由守卫 路由改变的时候触发
 router.beforeEach((to, from, next) => {
-  console.log("permit.js/8:\t", to);
   if (getToken()) {
     if (to.path === "/login") {
       removeToken();
       removeUsername();
       store.commit("app/REMOVE_TOKEN");
       store.commit("app/REMOVE_USERNAME");
-      // SET_TOKEN(state, value) {
-      //   state.token = value;
-      // },
-      // REMOVE_TOKEN(state) {
     }else{
       // TODO
       // 动态分配路由权限，获取用户角色
@@ -30,6 +25,5 @@ router.beforeEach((to, from, next) => {
     } else {
       next("/login");
     }
-    console.log("permit.js/7:", "not exist");
   }
 });

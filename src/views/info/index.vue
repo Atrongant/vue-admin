@@ -159,7 +159,6 @@ export default {
     const handleSizeChange = val => {};
     const handleCurrentChange = val => {};
     const close = () => {
-      console.log("index.vue/164:\t", 999999);
       dialogInfo.value = false;
     };
     const deleteItem = () => {
@@ -178,7 +177,7 @@ export default {
       });
     };
     const confirmDelete = val => {
-      console.log("index.vue/181:\t", val);
+      // TODO
     };
     return {
       //ref

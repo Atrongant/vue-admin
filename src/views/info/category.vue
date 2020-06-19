@@ -1,35 +1,36 @@
 <template>
   <section id="category">
-    <el-button type="danger">添加一级分类</el-button>
+    <el-button type="danger" @click="addFirst">添加一级分类</el-button>
     <hr class="hr-e9" />
     <div>
       <el-row :gutter="30">
         <el-col :span="8">
-          <div class="category">
+          <div class="category" v-for="item in category.item" :key="item.id">
             <h4>
-              <svg-icon iconClass="minus" class="minus" />新闻
+              <svg-icon iconClass="minus" class="minus" />
+              {{item.category_name}}
               <div class="button-group">
                 <el-button type="danger" round size="mini">编辑</el-button>
                 <el-button type="success" round size="mini">添加子级</el-button>
                 <el-button round size="mini">删除</el-button>
               </div>
             </h4>
-            <ul>
-              <li>
-                国内
+            <ul v-if="item.children">
+              <li v-for="child in item.children" :key="child.id">
+                {{child.category_name}}
                 <div class="button-group">
                   <el-button type="danger" round size="mini">编辑</el-button>
                   <el-button round size="mini">删除</el-button>
                 </div>
               </li>
+              <!-- <li>国内</li>
               <li>国内</li>
               <li>国内</li>
               <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>
+              <li>国内</li>-->
             </ul>
           </div>
-          <div class="category">
+          <!--  <div class="category">
             <h4>
               <svg-icon iconClass="minus" class="minus" />新闻
             </h4>
@@ -41,15 +42,15 @@
               <li>国内</li>
               <li>国内</li>
             </ul>
-          </div>
+          </div>-->
         </el-col>
         <el-col :span="16">
           <h4 class="menu-title">一级分类编辑</h4>
           <el-form :model="form" label-width="142px" class="form-wrap">
-            <el-form-item label="一级分类名称">
+            <el-form-item label="一级分类名称" v-if="categoryState">
               <el-input v-model="form.categoryName"></el-input>
             </el-form-item>
-            <el-form-item label="二级分类名称">
+            <el-form-item label="二级分类名称" v-if="childState">
               <el-input v-model="form.setCategoryName"></el-input>
             </el-form-item>
             <el-form-item>
@@ -63,31 +64,109 @@
 </template>
 
 <script>
-import { reactive } from "@vue/composition-api";
-import { addFirstCategory } from "@/api/news";
+import { reactive, ref, onMounted } from "@vue/composition-api";
+import { addFirstCategory, getCategoryAll, getCategory } from "@/api/news";
 export default {
   name: "infoCategory",
   setup(props, { root }) {
+    const categoryState = ref(true);
+    const childState = ref(true);
     const form = reactive({
       categoryName: "",
       setCategoryName: ""
     });
+    let category = reactive({item:[]});
+    // reactive([
+    //   {
+    //     id: "1",
+    //     category_name: "国际信息",
+    //     children: [
+    //       {
+    //         id: "11",
+    //         category_name: "国际信息1-1"
+    //       },
+    //       {
+    //         id: "12",
+    //         category_name: "国际信息1-2"
+    //       },
+    //       {
+    //         id: "13",
+    //         category_name: "国际信息1-3"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     id: "2",
+    //     category_name: "国内信息",
+    //     children: [
+    //       {
+    //         id: "21",
+    //         category_name: "国内信息2-1"
+    //       },
+    //       {
+    //         id: "22",
+    //         category_name: "国内信息2-2"
+    //       },
+    //       {
+    //         id: "23",
+    //         category_name: "国内信息2-3"
+    //       }
+    //     ]
+    //   }
+    // ]);
     const submit = () => {
+      if (!form.categoryName) {
+        root.$message({
+          message: "分类名称不能为空",
+          type: "error"
+        });
+        return false;
+      }
       let requestData = {
-        categoryName:form.categoryName
+        categoryName: form.categoryName
       };
-      console.log('category.vue/79:\t',requestData);
       addFirstCategory(requestData)
         .then(response => {
-          console.log("category.vue/78:\t", response);
+          if (response.resCode === 0) {
+            root.$message({
+              message: response.message,
+              type: "success"
+            });
+          }
         })
-        .catch(err => {
-          console.log("category.vue/80:\t", err);
-        });
+        .catch(err => {});
     };
+    const addFirst = () => {
+      categoryState.value = true;
+      childState.value = false;
+    };
+    const getCateAll = () => {
+      getCategoryAll({})
+        .then(response => {
+          console.log("category.vue->147:\t", response.data);
+          category.item = response.data;
+          console.log("category.vue->149:\t", category.item);
+        })
+        .catch(err => {});
+      // getCategoryAll({})
+      //   .then(response => {
+      //     console.log("category.vue->151:\t", response.data);
+      //   })
+      //   .catch(err => {});
+    };
+    onMounted(() => {
+      getCateAll();
+    });
     return {
+      //ref
+      categoryState,
+      childState,
+      //reactive
       form,
-      submit
+      category,
+      //function
+      submit,
+      addFirst
     };
   },
   components: {},

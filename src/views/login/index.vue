@@ -204,7 +204,6 @@ export default {
             /* 定时器 */
             loginBtnState.value = false;
             countDown(5);
-            console.log(err);
           });
       }, 3000);
     };
@@ -248,7 +247,6 @@ export default {
             registerForm();
           }
         } else {
-          console.log("error submit!!");
           return false;
         }
       });
@@ -263,7 +261,6 @@ export default {
       root.$store
         .dispatch("app/login", data)
         .then(response => {
-          console.log("index.vue/266:", response);
           /* 登录成功 */
           clearCountDown();
           root.$router.push({

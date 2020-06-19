@@ -40,7 +40,6 @@ export default {
       desc: ""
     });
     const close = () => {
-      console.log("info.vue/21:\t", 8888);
       dialogState.value = false;
       emit("close", false);
       //   this.$emit("update:flag", false);

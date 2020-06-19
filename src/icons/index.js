@@ -5,7 +5,6 @@ Vue.component("svg-icon", SvgIcon);
 // svg文件解析
 const req = require.context("./svg", false, /\.svg$/);
 const requireAll = (requireContext) => {
-  console.log("index.js/7:", requireContext.keys());
   return requireContext.keys().map(requireContext);
 };
 requireAll(req);

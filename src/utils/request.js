@@ -11,8 +11,6 @@ const service = axios.create({
 service.interceptors.request.use(
   function(config) {
     /* userid token */
-    console.log("config.headers=", config.headers);
-    console.log("request.js/15:\t", getToken());
     config.headers["token"] = getToken();
     config.headers["UserName"] = getUsername();
     // 在发送请求之前做些什么

@@ -39,14 +39,12 @@ const mutations = {
 const actions = {
   // content   cxt第一个参数指向state,getters,mutations...
   login(content, data) {
-    console.log("index.js/28:", data);
     return new Promise((resolve, reject) => {
       Login(data)
         .then((response) => {
           let data = response.data;
           content.commit("SET_TOKEN", data.token);
           content.commit("SET_USERNAME", data.username);
-          console.log('app.js/49:\t',data);
           setToken(data.token);
           setUsername(data.username);
           resolve(response);
@@ -58,7 +56,6 @@ const actions = {
   },
   exit(content) {
     return new Promise(resolve=>{
-      console.log("app.js/60:\t", "exit");
       content.commit("REMOVE_TOKEN");
       content.commit("REMOVE_USERNAME");
       removeUsername();
