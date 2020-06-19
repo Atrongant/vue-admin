@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Message } from "element-ui";
-
+import { getToken, getUsername } from "@/utils/app.js";
 const BASEURL = process.env.NODE_ENV === "production" ? "" : "/devapi";
 
 const service = axios.create({
@@ -12,8 +12,9 @@ service.interceptors.request.use(
   function(config) {
     /* userid token */
     console.log("config.headers=", config.headers);
-    config.headers["token"] = 111;
-    config.headers["userId"] = 222;
+    console.log("request.js/15:\t", getToken());
+    config.headers["token"] = getToken();
+    config.headers["UserName"] = getUsername();
     // 在发送请求之前做些什么
     /* 这里返回的是Promise.resolve */
     return config;

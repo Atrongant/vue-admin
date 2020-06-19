@@ -8,6 +8,7 @@
 import { ref, reactive, computed } from "@vue/composition-api";
 export default {
   name: "svgicons",
+  // 父组件传过来的值
   props: {
     className: {
       type: String
@@ -18,6 +19,7 @@ export default {
   },
   setup(props) {
     const msg = ref("abcdefghijkl");
+    // 计算属性值
     const iconName = computed(() => `#icon-${props.iconClass}`);
     const svgclass = computed(() => {
       if (props.className) {

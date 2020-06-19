@@ -19,7 +19,7 @@ router.beforeEach((to, from, next) => {
       // },
       // REMOVE_TOKEN(state) {
     }else{
-      // TODO 
+      // TODO
       // 动态分配路由权限，获取用户角色
     }
     next();

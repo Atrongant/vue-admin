@@ -46,6 +46,7 @@ const actions = {
           let data = response.data;
           content.commit("SET_TOKEN", data.token);
           content.commit("SET_USERNAME", data.username);
+          console.log('app.js/49:\t',data);
           setToken(data.token);
           setUsername(data.username);
           resolve(response);

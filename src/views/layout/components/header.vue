@@ -1,7 +1,7 @@
 <template>
   <section id="header-wrap">
     <div class="pull-left header-icon" @click="navMenuState">
-      <svg-icon iconClass="menu" class="menu" />
+      <svg-icon iconClass="menu" className="menu" />
     </div>
     <div class="pull-right">
       <div class="user-info pull-left">
@@ -10,7 +10,7 @@
       </div>
 
       <div class="header-icon pull-left" @click="exit">
-        <svg-icon iconClass="quit" class="quit" />
+        <svg-icon iconClass="quit" className="quit" />
       </div>
     </div>
   </section>
@@ -26,10 +26,10 @@ export default {
     };
     const username = computed(() => root.$store.state.app.username);
     const exit = () => {
-      root.$store.dispatch("app/exit").then(()=>{
-          root.$router.push({
-            name:"login"
-          })
+      root.$store.dispatch("app/exit").then(() => {
+        root.$router.push({
+          name: "login"
+        });
       });
     };
     return {
