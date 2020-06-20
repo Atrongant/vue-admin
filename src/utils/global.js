@@ -9,20 +9,10 @@ export default {
         center: true,
       })
         .then(() => {
-          //   if (typeof params.fn === "function") {
-          //     params.fn(params.id);
-          //   }
-          params.fn && params.fn(params.id);
-          //   root.$message({
-          //     type: "success",
-          //     message: "删除成功!",
-          //   });
+          params.fn && params.fn(params.id||"");
         })
         .catch(() => {
-          //   root.$message({
-          //     type: "info",
-          //     message: "已取消删除",
-          //   });
+          params.cancelFn && params.cancelFn();
         });
     };
   },

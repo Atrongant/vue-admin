@@ -1,48 +1,116 @@
 <template>
-  <el-dialog title="新增" :visible.sync="dialogState" @close="close" width="580px">
-    <el-form :model="form">
+  <el-dialog title="新增" :visible.sync="dialogState" @close="close" width="580px" @open="openDialog">
+    <el-form :model="formData" ref="formData">
       <el-form-item label="类型：" :label-width="formLabelWidth">
-        <el-select v-model="form.category" placeholder="请选择">
-          <el-option label="区域一" value="shanghai"></el-option>
-          <el-option label="区域二" value="beijing"></el-option>
+        <el-select v-model="formData.category" placeholder="请选择">
+          <el-option
+            :label="item.category_name"
+            :value="item.id"
+            v-for="item in categoryArr.item"
+            :key="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="标题：" :label-width="formLabelWidth">
-        <el-input v-model="form.title" auto-complete="off" placeholder="请输入内容"></el-input>
+        <el-input v-model="formData.title" auto-complete="off" placeholder="请输入内容"></el-input>
       </el-form-item>
       <el-form-item label="概况：" :label-width="formLabelWidth">
-        <el-input type="textarea" v-model="form.desc" placeholder="请输入内容"></el-input>
+        <el-input type="textarea" v-model="formData.desc" placeholder="请输入内容"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button @click="close = false">取消</el-button>
-      <el-button type="danger" @click="dialogFormVisible = false">确定</el-button>
+      <el-button @click="close">取消</el-button>
+      <el-button type="danger" :loading="sumbitLoadingState" @click="submit">确定</el-button>
     </div>
   </el-dialog>
 </template>
 
 <script>
-import { ref, reactive, watchEffect } from "@vue/composition-api";
+import { ref, reactive, watchEffect, onMounted } from "@vue/composition-api";
+import { addInfo } from "@/api/info";
 export default {
   name: "info",
   props: {
     flag: {
       type: Boolean,
       default: false
+    },
+    category: {
+      type: Array,
+      default: () => []
     }
   },
-  setup(props, { emit }) {
+  setup(props, { emit, root, refs }) {
     const dialogState = ref(true);
+    const sumbitLoadingState = ref(false);
     const formLabelWidth = ref("70px");
-    const form = reactive({
+    const categoryArr = reactive({ item: [] });
+    const formData = reactive({
       title: "",
       category: "",
       desc: ""
     });
+    /* 提交表单 */
+    const submit = () => {
+      if (formData.category === "") {
+        root.$message({
+          message: "分类名称不能为空",
+          type: "error"
+        });
+        return false;
+      }
+      if (formData.title === "") {
+        root.$message({
+          message: "标题不能为空",
+          type: "error"
+        });
+        return false;
+      }
+      if (formData.desc === "") {
+        root.$message({
+          message: "概况不能为空",
+          type: "error"
+        });
+        return false;
+      }
+      sumbitLoadingState.value = true;
+      let requestData = {
+        categoryId: formData.category,
+        title: formData.title,
+        content: formData.desc,
+        // createDate:"",
+        // imgUrl:"",
+      };
+      // TODO 更新列表页
+      addInfo(requestData)
+        .then(response => {
+          root.$message({
+            message: response.message,
+            type: "success"
+          });
+          sumbitLoadingState.value = false;
+          resetFormFields();
+        })
+        .catch(err => {
+          sumbitLoadingState.value = false;
+          resetFormFields();
+        });
+    };
+    /* 重置表单 */
+    const resetFormFields = () => {
+      formData.title = "";
+      formData.category = "";
+      formData.desc = "";
+    };
+    /* 弹窗关闭触发 */
     const close = () => {
       dialogState.value = false;
       emit("close", false);
       //   this.$emit("update:flag", false);
+    };
+    /* 打开弹窗时触发 */
+    const openDialog = () => {
+      categoryArr.item = props.category;
     };
     watchEffect(() => {
       dialogState.value = props.flag;
@@ -51,10 +119,14 @@ export default {
       //ref
       dialogState,
       formLabelWidth,
+      sumbitLoadingState,
       //reactive
-      form,
+      formData,
+      categoryArr,
       //function
-      close
+      close,
+      openDialog,
+      submit
     };
   }
 };

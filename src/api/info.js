@@ -12,7 +12,7 @@ export function addInfo(data) {
   return service.request({
     method: "post",
     url: "/news/add/",
-    data,
+    data:data
   });
 }
 /* 修改信息列表 */
@@ -24,7 +24,7 @@ export function editInfo(data) {
   });
 }
 /* 删除信息列表 */
-export function editInfo(data) {
+export function deleteInfo(data) {
   return service.request({
     method: "post",
     url: "/news/deleteInfo/",

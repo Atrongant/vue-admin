@@ -1,6 +1,6 @@
 <template>
   <section id="category">
-    <el-button type="danger" @click="addFirst">添加一级分类</el-button>
+    <el-button type="danger" @click="addFirst({type:'parentAdd'})">添加一级分类</el-button>
     <hr class="hr-e9" />
     <div>
       <el-row :gutter="30">
@@ -10,9 +10,14 @@
               <svg-icon iconClass="minus" class="minus" />
               {{item.category_name}}
               <div class="button-group">
-                <el-button type="danger" round size="mini">编辑</el-button>
+                <el-button
+                  type="danger"
+                  round
+                  size="mini"
+                  @click="editFirst({data:item,type:'editParent'})"
+                >编辑</el-button>
                 <el-button type="success" round size="mini">添加子级</el-button>
-                <el-button round size="mini">删除</el-button>
+                <el-button round size="mini" @click="deleteConfirm(item.id)">删除</el-button>
               </div>
             </h4>
             <ul v-if="item.children">
@@ -23,38 +28,25 @@
                   <el-button round size="mini">删除</el-button>
                 </div>
               </li>
-              <!-- <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>-->
             </ul>
           </div>
-          <!--  <div class="category">
-            <h4>
-              <svg-icon iconClass="minus" class="minus" />新闻
-            </h4>
-            <ul>
-              <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>
-              <li>国内</li>
-            </ul>
-          </div>-->
         </el-col>
         <el-col :span="16">
           <h4 class="menu-title">一级分类编辑</h4>
           <el-form :model="form" label-width="142px" class="form-wrap">
-            <el-form-item label="一级分类名称" v-if="categoryState">
-              <el-input v-model="form.categoryName"></el-input>
+            <el-form-item label="一级分类名称" v-if="showParentCateState">
+              <el-input v-model="form.categoryName" :disabled="parentCateDisabledState"></el-input>
             </el-form-item>
-            <el-form-item label="二级分类名称" v-if="childState">
-              <el-input v-model="form.setCategoryName"></el-input>
+            <el-form-item label="二级分类名称" v-if="showChildCateState">
+              <el-input v-model="form.setCategoryName" :disabled="childCateDisabledState"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="danger" @click="submit" :loading="loadingState">确定</el-button>
+              <el-button
+                type="danger"
+                @click="submit"
+                :loading="btnLoadingState"
+                :disabled="btnDisabledState"
+              >确定</el-button>
             </el-form-item>
           </el-form>
         </el-col>
@@ -64,19 +56,33 @@
 </template>
 
 <script>
-import { reactive, ref, onMounted } from "@vue/composition-api";
-import { addFirstCategory, getCategoryAll, getCategory } from "@/api/news";
+import { reactive, ref, onMounted, watch } from "@vue/composition-api";
+import {
+  addFirstCategory,
+  getCategoryAll,
+  getCategory,
+  deleteCategory,
+  editCategory
+} from "@/api/news";
+import { common } from "@/api/common";
 export default {
   name: "infoCategory",
   setup(props, { root }) {
-    const categoryState = ref(true);
-    const childState = ref(true);
-    const loadingState = ref(false);
+    const { categoryData, getInfoCateAll } = common();
+    const showParentCateState = ref(true);
+    const showChildCateState = ref(true);
+    const btnLoadingState = ref(false);
+    const parentCateDisabledState = ref(true);
+    const childCateDisabledState = ref(true);
+    const btnDisabledState = ref(true);
+    const deleteId = ref("");
+    const submitType = ref("");
     const form = reactive({
       categoryName: "",
       setCategoryName: ""
     });
-    let category = reactive({ item: [] });
+    let category = reactive({ item: [], current: [] });
+    /* 提交按钮触发 */
     const submit = () => {
       if (!form.categoryName) {
         root.$message({
@@ -85,7 +91,55 @@ export default {
         });
         return false;
       }
-      loadingState.value = true;
+      btnLoadingState.value = true;
+      if (submitType.value === "parentAdd") {
+        parentCateAdd();
+      }
+      if (submitType.value === "editParent") {
+        editParentCate();
+      }
+    };
+    /* 编辑一级分类按钮触发 */
+    const editFirst = params => {
+      submitType.value = params.type;
+      form.categoryName = params.data.category_name;
+      category.current = params.data;
+      resetParentDomState();
+    };
+    /* 编辑一级分类 */
+    const editParentCate = params => {
+      // {data:item,type:'editParent'}
+      console.log("category.vue->111:\t", 111);
+      let requestData = {
+        id: category.current.id,
+        categoryName: form.categoryName
+      };
+      editCategory(requestData)
+        .then(response => {
+          root.$message({
+            message: response.message,
+            type: "success"
+          });
+          // let idx = category.item.findIndex(
+          //   item => item.id == category.current.id
+          // );
+          // category.item[idx].category_name = form.categoryName;
+          category.current.category_name = form.categoryName;
+          // submitType.value = "";
+          // form.categoryName = "";
+          // btnLoadingState.value = false;
+          resetForm();
+          category.current = [];
+        })
+        .catch(err => {
+          // submitType.value = "";
+          // form.categoryName = "";
+          // btnLoadingState.value = false;
+          resetForm();
+        });
+    };
+    /* 添加一级分类：后台请求，状态重置等 */
+    const parentCateAdd = () => {
       let requestData = {
         categoryName: form.categoryName
       };
@@ -98,54 +152,104 @@ export default {
             });
           }
           category.item.push(response.data);
-          loadingState.value = false;
-          form.categoryName = "";
-          form.setCategoryName = "";
+          resetForm();
         })
         .catch(err => {
-          loadingState.value = false;
-          form.categoryName = "";
-          form.setCategoryName = "";
+          // form.setCategoryName = "";
+          // submitType.value = "";
+          // form.categoryName = "";
+          resetForm();
         });
     };
-    const addFirst = () => {
-      categoryState.value = true;
-      childState.value = false;
+    /* 添加一级分类按钮触发 */
+    const addFirst = params => {
+      form.categoryName = "";
+      submitType.value = params.type;
+      resetParentDomState();
     };
+    /* 提交一级分类表单以后重置表单 */
+    const resetForm = () => {
+      btnLoadingState.value = false;
+      showParentCateState.value = true;
+      showChildCateState.value = true;
+      parentCateDisabledState.value = true;
+      childCateDisabledState.value = true;
+      btnDisabledState.value = true;
+      form.setCategoryName = "";
+      submitType.value = "";
+      form.categoryName = "";
+    };
+    /* 编辑，新增一级分类时页面初始dom元素的状态 */
+    const resetParentDomState = () => {
+      showParentCateState.value = true; //显示第一个文本框
+      showChildCateState.value = false; //隐藏第二个文本框
+      parentCateDisabledState.value = false; //启用第一个文本框
+      btnDisabledState.value = false; //启用提交按钮
+    };
+    /* 获取全部分类后台请求*/
     const getCateAll = () => {
       getCategoryAll({})
         .then(response => {
-          console.log("category.vue->147:\t", response.data);
           category.item = response.data;
-          console.log("category.vue->149:\t", category.item);
         })
         .catch(err => {});
-      // getCategoryAll({})
-      //   .then(response => {
-      //     console.log("category.vue->151:\t", response.data);
-      //   })
-      //   .catch(err => {});
     };
+    /* 删除按钮触发确认删除操作 */
+    const deleteConfirm = id => {
+      deleteId.value = id;
+      root.confirm({
+        msg: "此操作将删除数据, 是否继续?",
+        fn: deleteItem,
+        cancelFn: () => {
+          deleteId.value = "";
+        }
+      });
+    };
+    /* 向后台发送删除delete请求，并刷新页面显示数据 */
+    const deleteItem = () => {
+      deleteCategory({ categoryId: deleteId.value })
+        .then(response => {
+          // category.item
+          root.$message({
+            message: response.message,
+            type: "success"
+          });
+          let idx = category.item.findIndex(item => item.id == deleteId.value);
+          category.item.splice(idx, 1);
+        })
+        .catch(err => {});
+    };
+
     onMounted(() => {
-      getCateAll();
+      // getCateAll();
+      getInfoCateAll();
     });
+    watch(
+      () => categoryData.item,
+      value => {
+        console.log("index.vue->173:\t", value);
+        category.item = value;
+      }
+    );
     return {
       //ref
-      categoryState,
-      childState,
-      loadingState,
+      showParentCateState,
+      showChildCateState,
+      btnLoadingState,
+      parentCateDisabledState,
+      childCateDisabledState,
+      btnDisabledState,
       //reactive
       form,
       category,
       //function
       submit,
-      addFirst
+      addFirst,
+      deleteItem,
+      deleteConfirm,
+      editFirst
     };
-  },
-  components: {},
-  watch: {},
-  mounted() {},
-  methods: {}
+  }
 };
 </script>
 
