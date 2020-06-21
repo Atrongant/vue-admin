@@ -29,6 +29,8 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               style="width:100%;"
+              format="yyyy年MM月dd日"
+              value-format="yyyy-MM-dd HH:mm:ss"
             ></el-date-picker>
           </div>
         </div>
@@ -52,7 +54,7 @@
         <el-input v-model="searchKeyWord" placeholder="请输入内容" style="width:100%;"></el-input>
       </el-col>
       <el-col :span="2">
-        <el-button type="danger" style="width:100%;">搜索</el-button>
+        <el-button type="danger" style="width:100%;" @click="getInfoList">搜索</el-button>
       </el-col>
       <el-col :span="3">&nbsp;</el-col>
       <el-col :span="2" class="pull-right">
@@ -75,7 +77,7 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button size="mini" type="danger" @click="deleteItem(scope.row.id)">删除</el-button>
-          <el-button size="mini" type="success" @click="dialogInfo=true">编辑</el-button>
+          <el-button size="mini" type="success" @click="editInfo(scope.row.id)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -96,26 +98,43 @@
         ></el-pagination>
       </el-col>
     </el-row>
-    <DialogInfo :flag.sync="dialogInfo" @close="close" :category="options.category" />
+    <!-- 新增弹窗 -->
+    <DialogInfo
+      :flag.sync="dialogInfo"
+      @close="close"
+      :category="options.category"
+      @getInfoList="getInfoList"
+    />
+    <!-- 编辑弹窗 -->
+    <DialogEditInfo
+      :flag.sync="dialogEditInfo"
+      :id="infoId"
+      @close="close"
+      :category="options.category"
+      @getInfoList="getInfoList"
+    />
   </section>
 </template>
 
 <script>
 import DialogInfo from "./dialog/info";
+import DialogEditInfo from "./dialog/edit";
 import { getList, deleteInfo } from "@/api/info";
 import { common } from "@/api/common";
 import { timestampToTime } from "@/utils/common";
 import { reactive, onMounted, ref, watch } from "@vue/composition-api";
 export default {
   name: "infoIndex",
-  components: { DialogInfo },
+  components: { DialogInfo, DialogEditInfo },
   setup(props, { refs, root }) {
     const { categoryData, getInfoCateAll } = common();
     const searchKey = ref("id");
     const categoryValue = ref("");
     const dateValue = ref("");
     const searchKeyWord = ref("");
+    const infoId = ref("");
     const dialogInfo = ref(false);
+    const dialogEditInfo = ref(false);
     const totalPageNum = ref(0);
     const loading = ref(false);
     const deleteId = ref("");
@@ -137,6 +156,7 @@ export default {
     const tableData = reactive({ item: [] });
     const close = () => {
       dialogInfo.value = false;
+      dialogEditInfo.value = false;
     };
     const deleteItem = val => {
       root.confirm({
@@ -171,16 +191,25 @@ export default {
         })
         .catch(err => {});
     };
-    const getInfoList = () => {
+    const formatData = () => {
       let requestData = {
-        categoryId: "",
-        startTiem: "",
-        endTime: "",
-        title: "",
-        id: "",
         pageNumber: pagination.currentPage,
         pageSize: pagination.size
       };
+      if (categoryValue.value) {
+        requestData.categoryId = categoryValue.value;
+      }
+      if (dateValue.value.length > 0) {
+        requestData.startTiem = dateValue.value[0];
+        requestData.endTime = dateValue.value[1];
+      }
+      if (searchKeyWord.value) {
+        requestData[searchKey.value] = searchKeyWord.value;
+      }
+      return requestData;
+    };
+    const getInfoList = () => {
+      let requestData = formatData();
       loading.value = true;
       getList(requestData)
         .then(response => {
@@ -225,6 +254,10 @@ export default {
       let selectedIds = val.map(item => item.id);
       deleteId.value = selectedIds;
     };
+    const editInfo = val => {
+      dialogEditInfo.value = true;
+      infoId.value = val;
+    };
     return {
       //ref
       totalPageNum,
@@ -234,6 +267,8 @@ export default {
       searchKeyWord,
       dialogInfo,
       loading,
+      infoId,
+      dialogEditInfo,
       //reactive
       options,
       searchOptions,
@@ -246,7 +281,9 @@ export default {
       handleCurrentChange,
       toCategory,
       toDate,
-      handleSelectionChange
+      handleSelectionChange,
+      getInfoList,
+      editInfo
     };
   }
 };

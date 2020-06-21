@@ -27,7 +27,8 @@
 
 <script>
 import { ref, reactive, watchEffect, onMounted } from "@vue/composition-api";
-import { addInfo } from "@/api/info";
+// import { getList, deleteInfo } from "@/api/info";
+import { getList, editInfo } from "@/api/info";
 export default {
   name: "info",
   props: {
@@ -38,6 +39,10 @@ export default {
     category: {
       type: Array,
       default: () => []
+    },
+    id: {
+      type: String,
+      default: ""
     }
   },
   setup(props, { emit, root, refs }) {
@@ -75,26 +80,26 @@ export default {
       }
       sumbitLoadingState.value = true;
       let requestData = {
+        id: props.id,
         categoryId: formData.category,
         title: formData.title,
         content: formData.desc
         // createDate:"",
         // imgUrl:"",
       };
-      addInfo(requestData)
+      editInfo(requestData)
         .then(response => {
           root.$message({
             message: response.message,
             type: "success"
           });
           sumbitLoadingState.value = false;
-          resetFormFields();
           emit("getInfoList");
-          refs.addInfoForm.resetFields();
+          // refs.addInfoForm.resetFields();
         })
         .catch(err => {
           sumbitLoadingState.value = false;
-          refs.addInfoForm.resetFields();
+          // refs.addInfoForm.resetFields();
         });
     };
     /* 重置表单 */
@@ -107,11 +112,30 @@ export default {
     const close = () => {
       dialogState.value = false;
       emit("close", false);
-      //   this.$emit("update:flag", false);
+      // emit("update:flag", false);
     };
     /* 打开弹窗时触发 */
     const openDialog = () => {
       categoryArr.item = props.category;
+      getInfo();
+    };
+
+    const getInfo = () => {
+      let requestData = {
+        pageNumber: 1,
+        pageSize: 1,
+        id: props.id
+      };
+      getList(requestData)
+        .then(response => {
+          let data = response.data.data[0];
+          formData.title = data.title;
+          formData.category = data.categoryId;
+          formData.desc = data.content;
+        })
+        .catch(err => {
+          loading.value = false;
+        });
     };
     watchEffect(() => {
       dialogState.value = props.flag;

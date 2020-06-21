@@ -16,7 +16,12 @@
                   size="mini"
                   @click="editFirst({data:item,type:'editParent'})"
                 >编辑</el-button>
-                <el-button type="success" round size="mini">添加子级</el-button>
+                <el-button
+                  type="success"
+                  round
+                  size="mini"
+                  @click="addChild({data:item,type:'addChild'})"
+                >添加子级</el-button>
                 <el-button round size="mini" @click="deleteConfirm(item.id)">删除</el-button>
               </div>
             </h4>
@@ -24,8 +29,13 @@
               <li v-for="child in item.children" :key="child.id">
                 {{child.category_name}}
                 <div class="button-group">
-                  <el-button type="danger" round size="mini">编辑</el-button>
-                  <el-button round size="mini">删除</el-button>
+                  <el-button
+                    type="danger"
+                    round
+                    size="mini"
+                    @click="editChild({parent:item,data:child})"
+                  >编辑</el-button>
+                  <el-button round size="mini" @click="deleteChild({parent:item,data:child})">删除</el-button>
                 </div>
               </li>
             </ul>
@@ -38,7 +48,7 @@
               <el-input v-model="form.categoryName" :disabled="parentCateDisabledState"></el-input>
             </el-form-item>
             <el-form-item label="二级分类名称" v-if="showChildCateState">
-              <el-input v-model="form.setCategoryName" :disabled="childCateDisabledState"></el-input>
+              <el-input v-model="form.childCategoryName" :disabled="childCateDisabledState"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button
@@ -62,7 +72,8 @@ import {
   getCategoryAll,
   getCategory,
   deleteCategory,
-  editCategory
+  editCategory,
+  addChildrenCategory
 } from "@/api/news";
 import { common } from "@/api/common";
 export default {
@@ -79,7 +90,7 @@ export default {
     const submitType = ref("");
     const form = reactive({
       categoryName: "",
-      setCategoryName: ""
+      childCategoryName: ""
     });
     let category = reactive({ item: [], current: [] });
     /* 提交按钮触发 */
@@ -98,6 +109,43 @@ export default {
       if (submitType.value === "editParent") {
         editParentCate();
       }
+      if (submitType.value === "addChild") {
+        addChildCate();
+      }
+    };
+    const addChildCate = () => {
+      let requestData = {
+        parentId: category.current.id,
+        categoryName: form.childCategoryName
+      };
+      console.log("category.vue->116:\t", requestData);
+      addChildrenCategory(requestData)
+        .then(response => {
+          root.$message({
+            message: response.message,
+            type: "success"
+          });
+          let idx = category.item.findIndex(
+            item => item.id == category.current.id
+          );
+          console.log("category.vue->124:\t", idx);
+          category.item[idx].children.push(response.data);
+          resetForm();
+        })
+        .catch(err => {
+          resetForm();
+        });
+    };
+    /* 添加子级时触发 */
+    const addChild = params => {
+      showParentCateState.value = true; //显示第一个文本框
+      showChildCateState.value = true; //显示第二个文本框
+      parentCateDisabledState.value = true; //禁用第一个文本框
+      childCateDisabledState.value = false; //启用第二个文本框
+      btnDisabledState.value = false; //启用提交按钮
+      form.categoryName = params.data.category_name; //设置第一个文本框的默认文字
+      category.current = params.data; //将数据放到current里
+      submitType.value = params.type; //更改提交类型
     };
     /* 编辑一级分类按钮触发 */
     const editFirst = params => {
@@ -155,7 +203,7 @@ export default {
           resetForm();
         })
         .catch(err => {
-          // form.setCategoryName = "";
+          // form.childCategoryName = "";
           // submitType.value = "";
           // form.categoryName = "";
           resetForm();
@@ -175,7 +223,7 @@ export default {
       parentCateDisabledState.value = true;
       childCateDisabledState.value = true;
       btnDisabledState.value = true;
-      form.setCategoryName = "";
+      form.childCategoryName = "";
       submitType.value = "";
       form.categoryName = "";
     };
@@ -231,6 +279,18 @@ export default {
         category.item = value;
       }
     );
+    const deleteChild = params => {
+      let child = params.data;
+      let parent = params.parent;
+      console.log("category.vue->285:\t", params);
+      console.log("category.vue->285:\t", child);
+      console.log("category.vue->286:\t", parent);
+    };
+    const editChild = params => {
+      let child = params.data;
+      let parent = params.parent;
+      console.log("category.vue->292:\t", params);
+    };
     return {
       //ref
       showParentCateState,
@@ -247,7 +307,10 @@ export default {
       addFirst,
       deleteItem,
       deleteConfirm,
-      editFirst
+      editFirst,
+      addChild,
+      editChild,
+      deleteChild
     };
   }
 };
