@@ -70,7 +70,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="45"></el-table-column>
-      <el-table-column prop="title" label="标题" width="830"></el-table-column>
+      <el-table-column prop="title" label="标题" width="750"></el-table-column>
       <el-table-column prop="categoryId" label="类别" width="130" :formatter="toCategory"></el-table-column>
       <el-table-column prop="createDate" label="日期" width="237" :formatter="toDate"></el-table-column>
       <el-table-column prop="user" label="管理人" width="115"></el-table-column>
@@ -78,6 +78,16 @@
         <template slot-scope="scope">
           <el-button size="mini" type="danger" @click="deleteItem(scope.row.id)">删除</el-button>
           <el-button size="mini" type="success" @click="editInfo(scope.row.id)">编辑</el-button>
+          <!-- <router-link
+            :to="{name: 'InfoDetails' , params : { id : scope.row.id } }"
+            class="margin-left-10"
+          >-->
+          <el-button
+            size="mini"
+            type="success"
+            @click="detaild( { id : scope.row.id ,title:scope.row.title})"
+          >编辑详情</el-button>
+          <!-- </router-link> -->
         </template>
       </el-table-column>
     </el-table>
@@ -258,6 +268,20 @@ export default {
       dialogEditInfo.value = true;
       infoId.value = val;
     };
+    const detaild = params => {
+      // root.$router.push({
+      //   path: `InfoDetails/${params.id}/${params.title}`
+      // });
+      root.$store.commit("InfoDetails/SET_ID", params.id);
+      root.$store.commit("InfoDetails/SET_TITLE", params.title);
+      root.$router.push({
+        name: "InfoDetails",
+        params: {
+          id: params.id,
+          title: params.title
+        }
+      });
+    };
     return {
       //ref
       totalPageNum,
@@ -283,7 +307,8 @@ export default {
       toDate,
       handleSelectionChange,
       getInfoList,
-      editInfo
+      editInfo,
+      detaild
     };
   }
 };

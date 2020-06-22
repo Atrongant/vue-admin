@@ -30,7 +30,7 @@ const routes = [
     component: Layout,
     meta: {
       name: "控制台",
-      icon:"console",
+      icon: "console",
     },
     hidden: false,
     redirect: "/index",
@@ -53,7 +53,7 @@ const routes = [
     component: Layout,
     meta: {
       name: "信息管理",
-      icon:"info"
+      icon: "info",
     },
     hidden: false,
     children: [
@@ -75,6 +75,15 @@ const routes = [
         },
         hidden: false,
       },
+      {
+        path: "/infoDetails",
+        name: "InfoDetails",
+        component: () => import("../views/info/detail.vue"),
+        meta: {
+          name: "信息详情",
+        },
+        hidden: true,
+      },
     ],
   },
   /* 用户管理 */
@@ -84,7 +93,7 @@ const routes = [
     component: Layout,
     meta: {
       name: "用户管理",
-      icon:"user"
+      icon: "user",
     },
     hidden: false,
     children: [
