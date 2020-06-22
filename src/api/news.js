@@ -47,3 +47,4 @@ export function getCategoryAll(data) {
     data,
   });
 }
+
