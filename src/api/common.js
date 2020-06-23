@@ -28,3 +28,12 @@ export function uploadImgToken(data) {
     data,
   });
 }
+
+/* 获取列表 */
+export function loadTable(requestdata) {
+  return service.request({
+    method: requestdata.post || "post",
+    url: requestdata.requestUrl,
+    data: requestdata.data||{},
+  });
+}

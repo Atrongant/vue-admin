@@ -39,14 +39,15 @@
         <div class="label-wrap key-word">
           <label for>搜索：</label>
           <div class="wrap-content">
-            <el-select v-model="searchKey" placeholder="请选择" style="width:100%;">
+            <SelectVue :config="data.configOption" />
+            <!-- <el-select v-model="searchKey" placeholder="请选择" style="width:100%;">
               <el-option
                 v-for="item in searchOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
               ></el-option>
-            </el-select>
+            </el-select>-->
           </div>
         </div>
       </el-col>
@@ -133,9 +134,10 @@ import { getList, deleteInfo } from "@/api/info";
 import { common } from "@/api/common";
 import { timestampToTime } from "@/utils/common";
 import { reactive, onMounted, ref, watch } from "@vue/composition-api";
+import SelectVue from "@c/select/";
 export default {
   name: "infoIndex",
-  components: { DialogInfo, DialogEditInfo },
+  components: { DialogInfo, DialogEditInfo, SelectVue },
   setup(props, { refs, root }) {
     const { categoryData, getInfoCateAll } = common();
     const searchKey = ref("id");
@@ -149,16 +151,21 @@ export default {
     const loading = ref(false);
     const deleteId = ref("");
     const options = reactive({ category: [] });
-    const searchOptions = reactive([
-      {
-        value: "id",
-        label: "ID"
-      },
-      {
-        value: "title",
-        label: "标题"
+    const data = reactive({
+      configOption: {
+        init: ["id", "title"]
       }
-    ]);
+    });
+    // const data = reactive([
+    //   {
+    //     value: "id",
+    //     label: "ID"
+    //   },
+    //   {
+    //     value: "title",
+    //     label: "标题"
+    //   }
+    // ]);
     const pagination = reactive({
       size: 10,
       currentPage: 1
@@ -295,7 +302,7 @@ export default {
       dialogEditInfo,
       //reactive
       options,
-      searchOptions,
+      data,
       tableData,
       //function
       deleteItem,
