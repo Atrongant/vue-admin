@@ -1,6 +1,11 @@
 <template>
   <section>
-    <el-table :data="data.tableData" border style="width: 100%">
+    <el-table
+      :data="data.tableData"
+      border
+      style="width: 100%"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" v-if="data.tableConfig.selection"></el-table-column>
       <template v-for="item in data.tableConfig.tHead">
         <el-table-column
@@ -23,17 +28,27 @@
         ></el-table-column>
       </template>
     </el-table>
-    <el-pagination
-      background
-      v-if="data.tableConfig.pagination"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="pageData.currentPage"
-      :page-sizes="pageData.pageSizes"
-      :page-size="pageData.pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="pageData.totalPage"
-    ></el-pagination>
+    <div class="table-footer">
+      <el-row>
+        <el-col :span="4">
+          <slot name="tableFooterLeft"></slot>
+        </el-col>
+        <el-col :span="20">
+          <el-pagination
+            class="pull-right"
+            background
+            v-if="data.tableConfig.pagination"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pageData.currentPage"
+            :page-sizes="pageData.pageSizes"
+            :page-size="pageData.pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="pageData.totalPage"
+          ></el-pagination>
+        </el-col>
+      </el-row>
+    </div>
   </section>
 </template>
 
@@ -48,9 +63,13 @@ export default {
     config: {
       type: Object,
       default: () => {}
+    },
+    tableRow: {
+      type: Object,
+      default: () => {}
     }
   },
-  data(props) {
+  setup(props, { emit }) {
     const { dataOfTable, loadDataForTable } = TableLoad();
     const {
       pageData,
@@ -67,8 +86,7 @@ export default {
         recordCheck: true,
         pagination: true
       },
-      tableData: [
-      ]
+      tableData: []
     });
     let initConfigTable = () => {
       let configtable = props.config;
@@ -80,28 +98,7 @@ export default {
       }
     };
     initConfigTable();
-    // let loadTableData = () => {
-    //   console.log("index.vue->89:\t", data.tableConfig.requestData);
-    //   loadTable(data.tableConfig.requestData)
-    //     .then(response => {
-    //       console.log("index.vue->91:\t", response);
-    //       if (response.data.data) {
-    //         data.tableData = response.data.data;
-    //       }
-    //     })
-    //     .catch(err => {});
-    // };
-    // loadTableData();
     loadDataForTable(data.tableConfig.requestData);
-    // onBeforeMount(() => {
-
-    // });
-    // watch(
-    //   () => dataOfTable.item,
-    //   (newValue, oldValue) => {
-    //     data.tableData = newValue;
-    //   }
-    // );
     watch(
       [() => dataOfTable.item, () => dataOfTable.total],
       ([tables, total]) => {
@@ -112,19 +109,37 @@ export default {
     watch(
       [() => pageData.currentPage, () => pageData.pageSize],
       ([curPage, pagesize]) => {
-        // FIXME
         if (data.tableConfig.requestData.data) {
           data.tableConfig.requestData.data.pageSize = pagesize;
           data.tableConfig.requestData.data.pageNumber = curPage;
           loadDataForTable(data.tableConfig.requestData);
         }
-        console.log("index.vue->146:\t", data.tableConfig.requestData.data);
       }
     );
-    return { data, pageData, handleSizeChange, handleCurrentChange };
+    const handleSelectionChange = val => {
+      console.log("index.vue->120:\t", val);
+      let rowData = {
+        idItem: val.map(item => item.id)
+      };
+      emit("update:tableRow", rowData);
+    };
+    const refreshTable = () => {
+      loadDataForTable(data.tableConfig.requestData);
+    };
+    return {
+      data,
+      pageData,
+      handleSizeChange,
+      handleCurrentChange,
+      handleSelectionChange,
+      refreshTable
+    };
   }
 };
 </script>
 
-<style scoped lang="less">
+<style scoped lang="scss">
+.table-footer {
+  padding: 15px 0;
+}
 </style>

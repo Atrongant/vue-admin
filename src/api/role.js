@@ -1,6 +1,6 @@
 import service from "@/utils/request.js";
 /* 获取角色 */
-export function getRole(data) {
+export function getRole(data={}) {
   return service.request({
     method: "post",
     url: "/role/",

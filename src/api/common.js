@@ -34,6 +34,14 @@ export function loadTable(requestdata) {
   return service.request({
     method: requestdata.post || "post",
     url: requestdata.requestUrl,
-    data: requestdata.data||{},
+    data: requestdata.data || {},
+  });
+}
+/* 获取城市列表 */
+export function cityPick(data) {
+  return service.request({
+    method: "post",
+    url: "/cityPicker/",
+    data,
   });
 }

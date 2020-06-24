@@ -20,27 +20,33 @@
         </div>
       </el-col>
       <el-col :span="4">
-        <el-button type="danger" class="pull-right" @click="addAUser">新增用户</el-button>
+        <el-button type="danger" class="pull-right" @click="data.addUserDialog=true">新增用户</el-button>
       </el-col>
     </el-row>
     <div class="blank-space-30"></div>
-    <TableVue :config="data.configtTable">
+    <TableVue :config="data.configtTable" :tableRow.sync="data.tableRow" ref="userTable">
       <template v-slot:status="slotData">
-        <el-switch active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+        <el-switch
+          v-model="slotData.data.status"
+          active-value="2"
+          inactive-value="1"
+          active-color="#13ce66"
+          inactive-color="#ff4949"
+        ></el-switch>
       </template>
       <template v-slot:operation="slotData">
-        <el-button
-          type="danger"
-          size="small"
-          @click="operate({columnData:slotData.data,type:'delete'})"
-        >删除</el-button>
+        <el-button type="danger" size="small" @click="singleDelete(slotData.data)">删除</el-button>
         <el-button
           type="success"
           size="small"
           @click="operate({columnData:slotData.data,type:'edit'})"
         >编辑</el-button>
       </template>
+      <template v-slot:tableFooterLeft>
+        <el-button size="small" @click="batchDelete">批量删除</el-button>
+      </template>
     </TableVue>
+    <DialogAddUser :flag.sync="data.addUserDialog" @close="close" />
   </section>
 </template>
 
@@ -48,6 +54,7 @@
 import { reactive } from "@vue/composition-api";
 import SelectVue from "@c/select/";
 import TableVue from "@c/table";
+import DialogAddUser from "./dialog/add";
 import {
   getList,
   addUser,
@@ -58,9 +65,11 @@ import {
 } from "@/api/user.js";
 export default {
   name: "userIndex",
-  components: { SelectVue, TableVue },
-  setup(props) {
+  components: { SelectVue, TableVue, DialogAddUser },
+  setup(props, { root, refs }) {
     const data = reactive({
+      tableRow: {},
+      addUserDialog: false,
       configOption: {
         init: ["name", "phone"]
       },
@@ -69,12 +78,12 @@ export default {
         tHead: [
           {
             label: "邮箱/用户名",
-            field: "email",
+            field: "username",
             width: 200
           },
           {
             label: "真实姓名",
-            field: "name",
+            field: "truename",
             width: 150
           },
           {
@@ -83,7 +92,7 @@ export default {
           },
           {
             label: "地区",
-            field: "address"
+            field: "region"
           },
           {
             label: "角色",
@@ -144,10 +153,43 @@ export default {
           console.log("index.vue->141:\t", err);
         });
     };
+    const close = () => {
+      data.addUserDialog = false;
+    };
+    const batchDelete = () => {
+      let userId = data.tableRow.idItem;
+      console.log("index.vue->165:\t", userId);
+      if (!userId || userId.length === 0) {
+        root.$message({
+          message: "请勾选需要删除的数据",
+          type: "error"
+        });
+        return false;
+      }
+      deleteUser();
+    };
+    const userDelete = () => {
+      deleteUser({ id: data.tableRow.idItem })
+        .then(response => {
+          root.$message({
+            message: response.message,
+            type: "success"
+          });
+          refs.userTable.refreshTable();
+        })
+        .catch(err => {});
+    };
+    const singleDelete = params => {
+      data.tableRow.idItem = [params.id];
+      userDelete();
+    };
     return {
       data,
       operate,
-      addAUser
+      addAUser,
+      close,
+      batchDelete,
+      singleDelete
     };
   }
 };
