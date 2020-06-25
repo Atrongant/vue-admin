@@ -118,7 +118,6 @@ export default {
         parentId: category.current.id,
         categoryName: form.childCategoryName
       };
-      console.log("category.vue->116:\t", requestData);
       addChildrenCategory(requestData)
         .then(response => {
           root.$message({
@@ -128,7 +127,6 @@ export default {
           let idx = category.item.findIndex(
             item => item.id == category.current.id
           );
-          console.log("category.vue->124:\t", idx);
           category.item[idx].children.push(response.data);
           resetForm();
         })
@@ -157,7 +155,6 @@ export default {
     /* 编辑一级分类 */
     const editParentCate = params => {
       // {data:item,type:'editParent'}
-      console.log("category.vue->111:\t", 111);
       let requestData = {
         id: category.current.id,
         categoryName: form.categoryName
@@ -275,21 +272,16 @@ export default {
     watch(
       () => categoryData.item,
       value => {
-        console.log("index.vue->173:\t", value);
         category.item = value;
       }
     );
     const deleteChild = params => {
       let child = params.data;
       let parent = params.parent;
-      console.log("category.vue->285:\t", params);
-      console.log("category.vue->285:\t", child);
-      console.log("category.vue->286:\t", parent);
     };
     const editChild = params => {
       let child = params.data;
       let parent = params.parent;
-      console.log("category.vue->292:\t", params);
     };
     return {
       //ref

@@ -15,7 +15,6 @@
       </el-form-item>
       <el-form-item label="地区：" :label-width="data.formLabelWidth" prop="region">
         <CityPicker :cityPickData.sync="data.cityPickData" />
-        {{data.cityPickData}}
       </el-form-item>
       <el-form-item label="是否启用：" :label-width="data.formLabelWidth" prop="status">
         <el-radio label="1" v-model="data.formData.status">禁用</el-radio>
@@ -81,7 +80,6 @@ export default {
       let requestData = JSON.parse(JSON.stringify(data.formData));
       requestData.role = requestData.role.join();
       requestData.region = JSON.stringify(data.cityPickData);
-      console.log("add.vue->96:\t", requestData);
       addUser(requestData)
         .then(response => {
           root.$message({
@@ -89,8 +87,9 @@ export default {
             type: "success"
           });
           sumbitLoadingState.value = false;
-          // resetFormFields();
-          // emit("getInfoList");
+          resetFormFields();
+          emit("refresh");
+          close();
         })
         .catch(err => {
           // resetFormFields();
@@ -99,7 +98,10 @@ export default {
     };
     /* 重置表单 */
     const resetFormFields = () => {
-      refs.addUserForm.resetFormFields();
+      // refs.addUserForm.resetFormFields();
+      data.cityPickData = {};
+      data.formData.role = [];
+      data.formData.region = "";
     };
     /* 弹窗关闭触发 */
     const close = () => {

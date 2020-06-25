@@ -64,7 +64,6 @@ export function CityPick() {
     getResultData();
   };
   const handleStreet = () => {
-    console.log("cityPick.js->64:\t");
     getResultData();
   };
   const getResultData = () => {

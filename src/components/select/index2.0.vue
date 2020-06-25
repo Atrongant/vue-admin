@@ -42,7 +42,6 @@ export default {
     config: {
       handler(newValue, oldValue) {
         // this.config=
-        console.log("index.vue->44:\t", newValue);
         this.initOptions();
       },
       immediate: true

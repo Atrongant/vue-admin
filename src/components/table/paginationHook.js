@@ -10,11 +10,9 @@ export function paginationHook() {
     pageData.totalPage = val;
   };
   const handleSizeChange = (val) => {
-    console.log('paginationHook.js->13:\t',val)
     pageData.pageSize=val;
   };
   const handleCurrentChange = (val) => {
-    console.log('paginationHook.js->16:\t',val)
     pageData.currentPage=val;
   };
   return {

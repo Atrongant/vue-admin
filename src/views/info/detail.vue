@@ -96,14 +96,12 @@ export default {
       };
       getList(requestData)
         .then(response => {
-          console.log("detail.vue->99:\t", response);
           let data = response.data.data[0];
           formData.title = data.title;
           formData.category = data.categoryId;
           formData.imgUrl = data.imgUrl;
           formData.content = data.content;
           formData.createDate = toDate(data.createDate);
-          console.log("detail.vue->106:\t", formData);
         })
         .catch(err => {
           loading.value = false;
@@ -143,7 +141,6 @@ export default {
         content: formData.content,
         imgUrl: formData.imgUrl
       };
-      console.log("detail.vue->145:\t", requestData);
       editInfo(requestData)
         .then(response => {
           root.$message({
@@ -158,13 +155,10 @@ export default {
     };
     const handleAvatarSuccess = (res, file) => {
       // formData.imageUrl = URL.createObjectURL(file.raw);
-      console.log("detail.vue->157:\t", res);
       let imgUrl = `http://aaaa.mywen.club/${res.key}`;
       formData.imgUrl = imgUrl;
-      console.log("detail.vue->164:\t", formData);
     };
     const handleAvatarError = (res, file) => {
-      console.log("detail.vue->163:\t", res);
     };
     const beforeAvatarUpload = file => {
       const isJPG = file.type === "image/jpeg";
@@ -188,15 +182,6 @@ export default {
       let buckety = "anki4ant";
       let uptoken = QiniuUPToken(accessKey, secretKey, buckety);
       formData.imgKey.token = uptoken;
-      // uploadImgToken(requestData)
-      //   .then(response => {
-      //     console.log("detail.vue->171:\t", response);
-      //     formData.imgKey.token = response.data.token;
-      //     console.log("detail.vue->176:\t", formData.imgKey);
-      //   })
-      //   .catch(err => {
-      //     console.log("detail.vue->173:\t", err);
-      //   });
     };
     return {
       //ref

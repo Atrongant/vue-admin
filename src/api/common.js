@@ -37,6 +37,7 @@ export function loadTable(requestdata) {
     data: requestdata.data || {},
   });
 }
+
 /* 获取城市列表 */
 export function cityPick(data) {
   return service.request({

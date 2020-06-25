@@ -115,7 +115,6 @@ export default {
         }
       ],
       ([province, city, area, street]) => {
-        console.log("index.vue->97:\t", resultData);
         emit("update:cityPickData", resultData);
       }
     );

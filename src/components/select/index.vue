@@ -1,5 +1,5 @@
 <template>
-  <el-select placeholder="请选择" v-model="data.selectValue">
+  <el-select placeholder="请选择" v-model="data.selectValue" @change="handleSelect">
     <el-option
       :label="item.label"
       :value="item.value"
@@ -17,10 +17,13 @@ export default {
     config: {
       type: Object,
       default: {}
+    },
+    selectData: {
+      type: Object,
+      default: () => {}
     }
   },
-  setup(props, { root }) {
-    console.log("index.vue->23:\t", props.config);
+  setup(props, { root, emit }) {
     const data = reactive({
       selectValue: "",
       initOption: [],
@@ -39,11 +42,15 @@ export default {
         arr.push(n);
       });
       data.initOption = arr;
-      console.log("index.vue->38:\t", arr);
       data.selectValue = data.initOption[0].value;
     });
+    const handleSelect = val => {
+      let filterData = data.option.filter(item => item.value == val)[0];
+      emit("update:selectData", filterData);
+    };
     return {
-      data
+      data,
+      handleSelect
     };
   }
 };

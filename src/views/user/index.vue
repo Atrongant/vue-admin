@@ -7,13 +7,13 @@
           <div class="wrap-content">
             <el-row :gutter="16">
               <el-col :span="3">
-                <SelectVue :config="data.configOption" />
+                <SelectVue :config="data.configOption" :selectData.sync="data.selectData" />
               </el-col>
               <el-col :span="5">
-                <el-input placeholder="请输入内容"></el-input>
+                <el-input placeholder="请输入内容" v-model="data.keyword"></el-input>
               </el-col>
               <el-col :span="15">
-                <el-button type="danger">搜索</el-button>
+                <el-button type="danger" @click="search">搜索</el-button>
               </el-col>
             </el-row>
           </div>
@@ -32,26 +32,27 @@
           inactive-value="1"
           active-color="#13ce66"
           inactive-color="#ff4949"
+          @change="handleSwitchChange(slotData.data)"
         ></el-switch>
       </template>
       <template v-slot:operation="slotData">
         <el-button type="danger" size="small" @click="singleDelete(slotData.data)">删除</el-button>
-        <el-button
+        <!--  <el-button
           type="success"
           size="small"
           @click="operate({columnData:slotData.data,type:'edit'})"
-        >编辑</el-button>
+        >编辑</el-button>-->
       </template>
       <template v-slot:tableFooterLeft>
         <el-button size="small" @click="batchDelete">批量删除</el-button>
       </template>
     </TableVue>
-    <DialogAddUser :flag.sync="data.addUserDialog" @close="close" />
+    <DialogAddUser :flag.sync="data.addUserDialog" @close="close" @refresh="refreshTable" />
   </section>
 </template>
 
 <script>
-import { reactive } from "@vue/composition-api";
+import { reactive, ref } from "@vue/composition-api";
 import SelectVue from "@c/select/";
 import TableVue from "@c/table";
 import DialogAddUser from "./dialog/add";
@@ -69,7 +70,9 @@ export default {
   setup(props, { root, refs }) {
     const data = reactive({
       tableRow: {},
+      keyword: "",
       addUserDialog: false,
+      selectData: {},
       configOption: {
         init: ["name", "phone"]
       },
@@ -123,7 +126,6 @@ export default {
       }
     });
     let operate = params => {
-      console.log("index.vue->100:\t", params);
       let columnData = params.data;
       let type = params.type;
       if (type === "edit") {
@@ -131,11 +133,9 @@ export default {
         let requestData = {
           id: []
         };
-        console.log("index.vue->107:\t", columnData);
       }
     };
     let addAUser = () => {
-      console.log("index.vue->129:\t", 129);
       let requestData = {
         username: "1234789012345",
         truename: "123455",
@@ -146,19 +146,14 @@ export default {
         role: "123455"
       };
       addUser(requestData)
-        .then(response => {
-          console.log("index.vue->139:\t", response);
-        })
-        .catch(err => {
-          console.log("index.vue->141:\t", err);
-        });
+        .then(response => {})
+        .catch(err => {});
     };
     const close = () => {
       data.addUserDialog = false;
     };
     const batchDelete = () => {
       let userId = data.tableRow.idItem;
-      console.log("index.vue->165:\t", userId);
       if (!userId || userId.length === 0) {
         root.$message({
           message: "请勾选需要删除的数据",
@@ -166,7 +161,7 @@ export default {
         });
         return false;
       }
-      deleteUser();
+      userDelete();
     };
     const userDelete = () => {
       deleteUser({ id: data.tableRow.idItem })
@@ -175,13 +170,39 @@ export default {
             message: response.message,
             type: "success"
           });
-          refs.userTable.refreshTable();
+          refreshTable();
         })
         .catch(err => {});
+    };
+    const refreshTable = () => {
+      refs.userTable.refreshTable();
     };
     const singleDelete = params => {
       data.tableRow.idItem = [params.id];
       userDelete();
+    };
+    const switchStatus = ref(false);
+    const handleSwitchChange = params => {
+      if (switchStatus.value) return false;
+      switchStatus.value = true;
+      activeUser({ id: params.id, status: params.status })
+        .then(response => {
+          root.$message({
+            message: response.message,
+            type: "success"
+          });
+          switchStatus.value = false;
+        })
+        .catch(err => {
+          switchStatus.value = false;
+        });
+    };
+    const search = () => {
+      let requestData = {
+        [data.selectData.value]: data.keyword
+      };
+      console.log("index.vue->204:\t", requestData);
+      refs.userTable.paramLoadData(requestData);
     };
     return {
       data,
@@ -189,7 +210,10 @@ export default {
       addAUser,
       close,
       batchDelete,
-      singleDelete
+      singleDelete,
+      refreshTable,
+      handleSwitchChange,
+      search
     };
   }
 };

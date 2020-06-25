@@ -70,7 +70,7 @@ export default {
     }
   },
   setup(props, { emit }) {
-    const { dataOfTable, loadDataForTable } = TableLoad();
+    const { dataOfTable, loadDataForTable, loadUserDataForTable } = TableLoad();
     const {
       pageData,
       handleSizeChange,
@@ -117,7 +117,6 @@ export default {
       }
     );
     const handleSelectionChange = val => {
-      console.log("index.vue->120:\t", val);
       let rowData = {
         idItem: val.map(item => item.id)
       };
@@ -126,13 +125,21 @@ export default {
     const refreshTable = () => {
       loadDataForTable(data.tableConfig.requestData);
     };
+    const paramLoadData = params => {
+      let requestData = Object.assign({}, params, {
+        pageNumber: 1,
+        pageSize: 10
+      });
+      loadUserDataForTable(requestData);
+    };
     return {
       data,
       pageData,
       handleSizeChange,
       handleCurrentChange,
       handleSelectionChange,
-      refreshTable
+      refreshTable,
+      paramLoadData
     };
   }
 };
